@@ -7,7 +7,8 @@ export const AppContext = createContext({});
 export const AppProvider = ({ children }) => {
   const [appContext, setAppContext] = useState({
     isLoadingStartApp: true,
-    isLoading: false
+    isLoading: false,
+    isOnline: true
   });
 
   useEffect(
@@ -19,3 +20,7 @@ export const AppProvider = ({ children }) => {
 
   return <AppContext.Provider value={[appContext, setAppContext]}>{children}</AppContext.Provider>;
 };
+
+// const ModalOffline = () => {
+
+// }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, TouchableHighlight, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, TouchableHighlight, Text, StatusBar } from 'react-native';
 import SearchZalo from '../../components/SearchZalo';
 import Icon, { Icons } from '../../common/component/Icons';
 import { COLOR_ZALO } from '../../constant/ColorCommon';
@@ -7,7 +7,8 @@ import { MessageRow } from '../../components/MessageRow';
 
 export default function MessagesScreen() {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
       <SearchZalo>
         <View>
           <TouchableHighlight
@@ -22,13 +23,13 @@ export default function MessagesScreen() {
           </TouchableHighlight>
         </View>
       </SearchZalo>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* todo */}
         <View style={{ backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((row, index) => (
-            <MessageRow key={index} />
+            <MessageRow key={index} isGroup={index === 1} />
           ))}
-          <Text style={{ marginTop: 20, marginBottom: 20, fontSize: 16 }}> Xem thêm </Text>
+          <Text style={{ marginTop: 20, marginBottom: 20, fontSize: 16 }}>Xem thêm</Text>
         </View>
         <View style={styles.suggestAddFriend}>
           <Text> Gợi ý kết bạn </Text>
@@ -41,8 +42,8 @@ export default function MessagesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: '#ced6e1',
+    paddingBottom: 60
   },
   suggestAddFriend: {
     marginTop: 20

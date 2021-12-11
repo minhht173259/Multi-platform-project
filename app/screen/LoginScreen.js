@@ -42,7 +42,11 @@ const LoginScreen = function ({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
-    await authContext.signIn(phoneNumber, password);
+    try {
+      await authContext.signIn(phoneNumber, password);
+    } catch (error) {
+      console.log('Error: ', error);
+    }
   };
 
   const handleChangePhoneNumber = text => {

@@ -10,7 +10,6 @@ export default function App() {
     <AppProvider>
       <AuthenticationProvider>
         <NavigationContainer>
-          <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
           <AppStackScreens />
         </NavigationContainer>
       </AuthenticationProvider>

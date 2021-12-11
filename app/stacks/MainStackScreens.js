@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React, { useRef, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { Dimensions, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import MessagesScreen from '../screen/Main/MessagesScreen';
 import PhoneBookScreen from '../screen/Main/PhoneBookScreen';
@@ -24,13 +25,13 @@ const TabArr = [
     icon: 'phone',
     component: PhoneBookScreen
   },
-  {
-    route: 'Group',
-    label: 'Nhóm',
-    type: Icons.Feather,
-    icon: 'users',
-    component: PostScreen
-  },
+  // {
+  //   route: 'Group',
+  //   label: 'Nhóm',
+  //   type: Icons.Feather,
+  //   icon: 'users',
+  //   component: PostScreen
+  // },
   {
     route: 'PostStack',
     label: 'Nhật ký',

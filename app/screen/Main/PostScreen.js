@@ -8,7 +8,8 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  StatusBar
 } from 'react-native';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import TextStyles from '../../components/Text';
@@ -29,6 +30,7 @@ export default function PostScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
       <SearchZalo>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
           <TouchableHighlight
@@ -49,7 +51,7 @@ export default function PostScreen({ navigation }) {
           </TouchableHighlight>
         </View>
       </SearchZalo>
-      <ScrollView>
+      <ScrollView horizontal={false} showsVerticalScrollIndicator={false}>
         <View style={styles.upload_post_container}>
           <View style={styles.upload_post_search}>
             <Image
@@ -66,7 +68,7 @@ export default function PostScreen({ navigation }) {
               underlayColor="red"
               activeOpacity={0.6}
               onPress={() => {
-                console.log('Press');
+                navigation.navigate('PostCreate');
               }}
               style={{
                 width: '100%',

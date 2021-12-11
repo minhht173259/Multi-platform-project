@@ -6,6 +6,8 @@ import { COLOR_ZALO } from '../constant/ColorCommon';
 
 const { width } = Dimensions.get('window');
 
+const H_BAR = 50;
+
 const SearchZalo = ({ onPressHandler = () => {}, children, ...restProps }) => {
   const handlerOnPress = () => {
     onPressHandler();
@@ -25,12 +27,13 @@ const styles = StyleSheet.create({
   searchContainer: {
     width,
     backgroundColor: COLOR_ZALO.searchBackground,
-    padding: 10,
     paddingLeft: 20,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+
+    height: H_BAR
   },
   text: {
     marginLeft: 20,

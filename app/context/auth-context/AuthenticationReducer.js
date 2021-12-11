@@ -3,7 +3,7 @@ import { AuthenticationEvent } from './AuthenticationEvent';
 
 export const authenticationStateDefault = {
   isLoggedIn: null,
-  token: null,
+  token: '123123',
   phone: '',
   userName: '',
   icons: '',

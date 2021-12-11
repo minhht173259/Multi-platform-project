@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView, Image, TouchableHighlight } from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, StatusBar, TouchableHighlight } from 'react-native';
 import SearchZalo from '../../components/SearchZalo';
 import Icon, { Icons } from '../../common/component/Icons';
 import { COLOR_ZALO } from '../../constant/ColorCommon';
@@ -7,6 +7,7 @@ import { COLOR_ZALO } from '../../constant/ColorCommon';
 export default function PhoneBookScreen() {
   return (
     <SafeAreaView>
+      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
       <SearchZalo>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
           <TouchableHighlight

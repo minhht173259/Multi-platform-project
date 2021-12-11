@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  StatusBar,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Image
+} from 'react-native';
 import Icon, { Icons } from '../../../common/component/Icons';
 import { COLOR_ZALO } from '../../../constant/ColorCommon';
 
@@ -14,6 +24,14 @@ const PostDetailScreen = ({ navigation, route }) => {
 
   // TODO: Route with information of POST: postId, postContent, PostImage
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+      headerTransparent: false,
+      presentation: 'modal'
+    });
+  }, [navigation]);
+
   const handleChangeComment = text => {
     setComment(text);
   };
@@ -24,6 +42,7 @@ const PostDetailScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
       <View style={styles.navigateContainer}>
         <TouchableOpacity onPress={onClickNavigateBack}>
           <Icon type={Icons.Feather} name="arrow-left" size={26} color="#ffffff" />

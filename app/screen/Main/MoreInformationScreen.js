@@ -1,14 +1,34 @@
-import React, { useContext } from 'react';
-import { Text, View, StyleSheet, SafeAreaView, ScrollView, Image, TouchableHighlight } from 'react-native';
+import React, { useCallback, useContext } from 'react';
+import {
+  Text,
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Image,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  StatusBar
+} from 'react-native';
 import AuthenticationContext from '../../context/auth-context/AuthenticationContext';
 import SearchZalo from '../../components/SearchZalo';
 import Icon, { Icons } from '../../common/component/Icons';
 import { COLOR_ZALO } from '../../constant/ColorCommon';
 
-export default function MoreInformationScreen() {
+export default function MoreInformationScreen({ navigation }) {
   const [authState] = useContext(AuthenticationContext);
+
+  const onClickNavigateSetting = useCallback(() => {
+    navigation.navigate('Settings');
+  }, [navigation]);
+
+  const onClickNavigateProfile = useCallback(() => {
+    navigation.navigate('Profile');
+  }, [navigation]);
+
   return (
     <SafeAreaView>
+      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
       <SearchZalo>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
           <TouchableHighlight
@@ -24,6 +44,7 @@ export default function MoreInformationScreen() {
               height: 30,
               borderRadius: 15
             }}
+            onPress={onClickNavigateSetting}
           >
             <Icon type={Icons.Ionicons} name="ios-settings-outline" color="#ffffff" />
           </TouchableHighlight>
@@ -37,11 +58,12 @@ export default function MoreInformationScreen() {
               uri: 'https://reactnative.dev/img/tiny_logo.png'
             }}
           />
-
-          <View style={styles.accountInfo}>
-            <Text style={styles.username}>{!authState.username ? ' Hoàng Minh' : authState.username} </Text>
-            <Text style={styles.notes}> Bấm để xem trang cá nhân </Text>
-          </View>
+          <TouchableWithoutFeedback onPress={onClickNavigateProfile}>
+            <View style={styles.accountInfo}>
+              <Text style={styles.username}>{!authState.username ? 'Chưa đặt tên' : authState.username} </Text>
+              <Text style={styles.notes}>Bấm để xem trang cá nhân</Text>
+            </View>
+          </TouchableWithoutFeedback>
           <Icon
             type={Icons.MaterialCommunityIcons}
             name="account-convert-outline"
