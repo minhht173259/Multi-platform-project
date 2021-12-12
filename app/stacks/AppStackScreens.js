@@ -11,9 +11,8 @@ import AuthenticationContext from '../context/auth-context/AuthenticationContext
 import AuthLoadingScreen from '../screen/AuthLoadingScreen';
 import PostDetailScreen from '../screen/Main/post-screen/PostDetailScreen';
 import PostZoomInScreen from '../screen/Main/post-screen/PostZoomInScreen';
-import SettingScreen from '../screen/Main/profile/SettingScreen';
-import ProfileScreen from '../screen/Main/profile/ProfileScreen';
 import AddPostScreen from '../screen/Main/post-screen/AddPostScreen';
+import UserStackScreen from './UserStackScreens';
 
 export const AppStack = createStackNavigator();
 
@@ -43,9 +42,8 @@ export default function AppStackScreens() {
         <AppStack.Screen name="PostDetail" component={PostDetailScreen} />
         <AppStack.Screen name="PostZoomIn" component={PostZoomInScreen} />
         <AppStack.Screen name="PostCreate" component={AddPostScreen} />
-        <AppStack.Screen name="Settings" component={SettingScreen} />
-        <AppStack.Screen name="Profile" component={ProfileScreen} />
       </AppStack.Group>
+      <AppStack.Screen name="UserProfile" component={UserStackScreen} />
     </AppStack.Navigator>
   );
 }

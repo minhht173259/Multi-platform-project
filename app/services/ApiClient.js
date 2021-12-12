@@ -68,7 +68,6 @@ class ApiClient {
     request.data = body;
     try {
       request = await this.authorizeRequest(request);
-      console.log('REQUEST: ', request);
       const response = await axios(request);
       return response.data;
     } catch (error) {

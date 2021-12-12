@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 
-const Popup = ({ open = false, showPopup, closePopup, children }) => {
+const Popup = ({ open = false, showPopup, backgroundColor = '#000000AA', closePopup, children }) => {
   const renderOutsideTouchable = onTouch => {
     const view = (
       <View
@@ -21,7 +21,7 @@ const Popup = ({ open = false, showPopup, closePopup, children }) => {
 
   return (
     <Modal transparent animationType="fade" visible={open}>
-      <View style={styles.popupContainer}>
+      <View style={[styles.popupContainer, { backgroundColor }]}>
         {renderOutsideTouchable(closePopup)}
         {children}
       </View>
@@ -33,8 +33,7 @@ const styles = StyleSheet.create({
   popupContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000000AA'
+    alignItems: 'center'
   }
 });
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -21,6 +21,14 @@ const HEIGH_BAR = 50;
 
 const SettingScreen = ({ navigation }) => {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+      presentation: 'modal'
+    });
+  }, []);
+
   const onClickNavigateBack = () => {
     navigation.goBack();
   };
