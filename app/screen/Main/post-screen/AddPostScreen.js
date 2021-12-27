@@ -9,63 +9,77 @@ import {
   ScrollView,
   TextInput,
   Dimensions,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Image
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import Icon, { Icons } from '../../../common/component/Icons';
+import Colors from '../../../constant/Colors';
 
 const SPACING = 16;
 
 const { width } = Dimensions.get('window');
 
-const AddPostScreen = ({ navigation }) => {
+const AddPostScreen = ({ submit, closePopup }) => {
   const [content, setContent] = useState();
   const [images, setImages] = useState([]);
-  const [video, setVideo] = useState([]);
+  const [video, setVideo] = useState();
 
-  const isSubmit = (!!content && content !== '') || images.length > 0 || video.length > 0;
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      headerTitleAlign: 'left',
-      headerTransparent: false,
-      headerTitle: () => renderHeaderTitle(),
-      headerRight: () => renderHeaderRight(isSubmit),
-      presentation: 'modal',
-      headerStyle: { backgroundColor: '#fafafa' }
-    });
-  }, [navigation, isSubmit]);
+  const isSubmit = (!!content && content !== '') || images.length > 0 || video;
 
   const onSubmitCreatePost = () => {
-    console.log('Press');
+    console.log('PRESS');
+    if (isSubmit) {
+      submit(images, video, content);
+      closePopup();
+    }
   };
 
   const onChangeText = text => {
     setContent(text);
   };
 
-  const onChangeImages = () => {};
+  const onChangeImages = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+      base64: false,
+      exif: false
+    });
 
-  const onChangeVideo = () => {};
+    if (!result.cancelled) {
+      const newImages = [...images, result];
+      setImages(newImages);
+    }
+  };
+
+  const onChangeVideo = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+      base64: false,
+      exif: false,
+      videoMaxDuration: 10
+    });
+
+    if (!result.cancelled) {
+      setVideo(result);
+    }
+  };
 
   const renderHeaderTitle = useCallback(() => <HeaderTitle />, []);
 
-  const renderHeaderRight = useCallback(
-    value => (
-      <TouchableOpacity style={{ marginRight: 10 }} onPress={value ? onSubmitCreatePost : undefined}>
-        <Text style={{ color: value ? '#0c85fd' : '#87c8fc' }}>ĐĂNG</Text>
-      </TouchableOpacity>
-    ),
-    []
-  );
-
   const renderImagesShow = () => {
     const size = images.length;
-    if (size || size === 0) {
+    if (!size || size === 0) {
       return null;
     }
 
-    const numberOfCol = Math.round(size / 2) + 1;
+    const numberOfCol = Math.round(size / 2);
     const padding = SPACING;
     const WIDTH_ITEM = (width - padding * 2) / numberOfCol;
 
@@ -83,7 +97,7 @@ const AddPostScreen = ({ navigation }) => {
         }}
       >
         <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text> Content </Text>
+          <Image source={{ uri: images[0].uri }} style={{ width: WIDTH_ITEM, height: 300, resizeMode: 'cover' }} />
         </View>
         <TouchableWithoutFeedback>
           <View
@@ -103,7 +117,24 @@ const AddPostScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ backgroundColor: '#FFFFFF', flex: 1 }}>
-      <StatusBar />
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 16,
+          paddingVertical: 4,
+          backgroundColor: '#FFFFFF'
+        }}
+      >
+        <TouchableOpacity onPress={closePopup}>
+          <Icon name="arrowleft" type={Icons.AntDesign} size={20} color="#000000" />
+        </TouchableOpacity>
+        <View style={{ flexGrow: 1, marginLeft: 16 }}>{renderHeaderTitle()}</View>
+        <TouchableOpacity style={{ marginRight: 10 }} onPress={onSubmitCreatePost}>
+          <Text style={{ color: isSubmit ? '#0c85fd' : '#87c8fc' }}>ĐĂNG</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView>
         <TextInput
           editable
@@ -121,10 +152,19 @@ const AddPostScreen = ({ navigation }) => {
         {renderImagesShow()}
       </ScrollView>
       <View style={{ width: '100%', padding: SPACING, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-        <Icon name="sticker-emoji" type={Icons.MaterialCommunityIcons} size={30} style={{ flexGrow: 1 }} />
-        <Icon name="sticker-emoji" type={Icons.MaterialCommunityIcons} size={30} />
-        <Icon name="sticker-emoji" type={Icons.MaterialCommunityIcons} size={30} />
-        <Icon name="sticker-emoji" type={Icons.MaterialCommunityIcons} size={30} />
+        <Icon name="emotsmile" type={Icons.SimpleLineIcons} size={30} style={{ flexGrow: 1 }} color={Colors.zaloBlue} />
+        <TouchableOpacity onPress={onChangeImages}>
+          <Icon
+            name="ios-images"
+            type={Icons.Ionicons}
+            size={30}
+            color={Colors.zaloBlue}
+            style={{ marginHorizontal: 16 }}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onChangeVideo}>
+          <Icon name="video" type={Icons.Entypo} size={30} color={Colors.zaloBlue} />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

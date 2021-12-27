@@ -9,7 +9,7 @@ import { LoadingContext } from '../../../context/LoadingContext';
 const SPACING = 16;
 
 const AccountAndSecurityScreen = ({ navigation }) => {
-  const [auth, _] = useContext(AuthenticationContext);
+  const [authState, authContext] = useContext(AuthenticationContext);
   const loadingContext = useContext(LoadingContext);
   const [open, setOpen] = useState(false);
 
@@ -29,13 +29,16 @@ const AccountAndSecurityScreen = ({ navigation }) => {
     });
   }, []);
 
-  const logout = () => {
-    console.log('Logout');
+  const logout = async () => {
     setOpen(false);
     loadingContext.startLoading();
-    setTimeout(() => {
+    try {
+      await authContext.logout();
       loadingContext.endLoading();
-    }, 2000);
+    } catch (error) {
+      console.log('ERROR: ', error);
+      loadingContext.endLoading();
+    }
   };
 
   const onPressLogout = () => {
@@ -53,7 +56,7 @@ const AccountAndSecurityScreen = ({ navigation }) => {
       rows: [
         {
           label: 'Đổi số điện thoại',
-          note: auth?.phone,
+          note: authState?.phone,
           onPress: null,
           colorLabel: '#222222'
         },
@@ -65,7 +68,7 @@ const AccountAndSecurityScreen = ({ navigation }) => {
         },
         {
           label: 'Đổi số điện thoại',
-          note: auth?.phone,
+          note: authState?.phone,
           onPress: 'ChangePassword',
           colorLabel: '#222222'
         }

@@ -12,9 +12,11 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import AuthenticationContext from '../context/auth-context/AuthenticationContext';
+import { LoadingContext } from '../context/LoadingContext';
 
 const LoginScreen = function ({ navigation }) {
-  const [_, authContext] = useContext(AuthenticationContext);
+  const [authState, authContext] = useContext(AuthenticationContext);
+  const { startLoading, endLoading } = useContext(LoadingContext);
   const [focus, setFocus] = useState({
     phone: false,
     password: false
@@ -25,7 +27,6 @@ const LoginScreen = function ({ navigation }) {
 
   const [phoneNumber, setPhoneNumber] = useState(null);
   const [password, setPassword] = useState(null);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const KeyboardListenerShow = Keyboard.addListener('keyboardDidShow', () => {
@@ -42,9 +43,12 @@ const LoginScreen = function ({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
+    startLoading();
     try {
       await authContext.signIn(phoneNumber, password);
+      endLoading();
     } catch (error) {
+      endLoading();
       console.log('Error: ', error);
     }
   };
@@ -150,7 +154,19 @@ const LoginScreen = function ({ navigation }) {
             {`${isHiddenPassword ? 'HIỆN' : 'ẨN'}`}
           </Text>
         </View>
-        <TouchableOpacity style={{ marginTop: 20 }} activeOpacity={0.7}>
+        {authState?.error && (
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: 'normal',
+              color: '#f15656',
+              marginTop: 10
+            }}
+          >
+            {authState.error}
+          </Text>
+        )}
+        <TouchableOpacity style={{ marginTop: 10 }} activeOpacity={0.7}>
           <Text
             style={{
               fontSize: 16,

@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
@@ -9,8 +10,10 @@ const { width } = Dimensions.get('window');
 const H_BAR = 50;
 
 const SearchZalo = ({ onPressHandler = () => {}, children, ...restProps }) => {
+  const navigation = useNavigation();
   const handlerOnPress = () => {
-    onPressHandler();
+    // onPressHandler();
+    navigation.navigate('Search');
   };
   return (
     <TouchableWithoutFeedback onPress={handlerOnPress}>

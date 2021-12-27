@@ -14,6 +14,7 @@ import Icon, { Icons } from '../../../common/component/Icons';
 import Popup from '../../../components/Popup';
 import RowSetting from '../../../components/RowSetting';
 import { COLOR_ZALO } from '../../../constant/ColorCommon';
+import Colors from '../../../constant/Colors';
 import { SETTING_ONE, SETTING_THREE, SETTING_TWO } from '../../../data/settings';
 
 const SPACING = 16;
@@ -25,7 +26,7 @@ const SettingScreen = ({ navigation }) => {
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
-      presentation: 'modal'
+      presentation: 'transparentModal'
     });
   }, []);
 
@@ -41,9 +42,18 @@ const SettingScreen = ({ navigation }) => {
     setOpen(false);
   };
 
+  const onPressAccountAndSecurity = () => {
+    navigation.navigate('UserProfile', {
+      screen: 'AccountAndSecurity'
+    });
+  };
+
   const onPressRow = useCallback(key => {
     if (key === 'LOGOUT') {
       onPressLogout();
+    }
+    if (key === 'SECURITY') {
+      onPressAccountAndSecurity();
     }
   }, []);
 
@@ -54,7 +64,7 @@ const SettingScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#3083DC" barStyle="light-content" />
+      {/* <StatusBar backgroundColor="#3083DC" barStyle="light-content" /> */}
       <View style={styles.navigationBar}>
         <TouchableOpacity onPress={onClickNavigateBack}>
           <Icon type={Icons.Feather} name="arrow-left" size={26} color="#ffffff" />
@@ -66,7 +76,7 @@ const SettingScreen = ({ navigation }) => {
       <ScrollView horizontal={false} showsVerticalScrollIndicator={false} alwaysBounceVertical>
         <View style={{ backgroundColor: '#FFFFFF' }}>
           {SETTING_ONE.map((item, index) => (
-            <TouchableWithoutFeedback key={index}>
+            <TouchableWithoutFeedback key={index} onPress={() => onPressRow(item.key)}>
               <RowSetting item={item} borderBottom={index !== SETTING_ONE.length - 1} />
             </TouchableWithoutFeedback>
           ))}
@@ -109,7 +119,8 @@ const SettingScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: Colors.zaloBackgroundColor
   },
   navigationBar: {
     backgroundColor: COLOR_ZALO.searchBackground,

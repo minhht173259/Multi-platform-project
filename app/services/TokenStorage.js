@@ -1,3 +1,9 @@
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const tokenStorage = {};
+export const tokenStorage = {
+  async tokenInvalid(code) {
+    if (code === 9998) {
+      await AsyncStorage.clear();
+    }
+  }
+};

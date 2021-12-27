@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import apiClient from '../ApiClient';
 
 class UserService {
@@ -7,6 +6,25 @@ class UserService {
     request.append('user_id', userId);
 
     const response = await apiClient.post('/get_user_info', request, null);
+    return response;
+  }
+
+  async setUserInfo(username, description, country, address, link, avatar) {
+    const request = new FormData();
+    request.append('user_name', username);
+    request.append('description', description);
+    request.append('address', address);
+    request.append('country', country);
+    request.append('link', link);
+    if (avatar?.uri) {
+      request.append('avatar', {
+        uri: avatar.uri,
+        name: 'abc.jpg',
+        type: 'image/**'
+      });
+    }
+
+    const response = await apiClient.post('/set_user_info', request, null);
     return response;
   }
 
@@ -36,6 +54,7 @@ class UserService {
     request.append('count', count);
 
     const response = await apiClient.post('/get_suggested_list_friends', request, null);
+
     return response;
   }
 
@@ -91,11 +110,7 @@ class UserService {
   getVerifyCode() {}
 
   checkVerifyCode() {}
-
-  delSavedSearch() {}
-
-  getSavedSearch() {}
 }
 
-const userService = UserService();
+const userService = new UserService();
 export default userService;

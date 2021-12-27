@@ -4,16 +4,30 @@ class PostService {
   async addPost(described, images, video) {
     const formDataRequest = new FormData();
     formDataRequest.append('described', described);
-    formDataRequest.append('image', images);
-    formDataRequest.append('video', video);
+    if (images && images.length > 0) {
+      // TODO: map
+      formDataRequest.append('image[]', {
+        uri: images[0].uri,
+        name: 'abc',
+        type: 'image/**'
+      });
+    } else if (video) {
+      formDataRequest.append('video', video);
+    }
 
     const response = await apiClient.post('/add_post', formDataRequest, null);
     return response;
   }
 
-  getPost() {}
+  async getPost(id) {
+    const request = new FormData();
+    request.append('id', id);
 
-  async getListPosts(lastId = -1, index = 0, count = 5) {
+    const response = await apiClient.post('/get_post', request, null);
+    return response;
+  }
+
+  async getListPosts(lastId = 0, index = 0, count = 5) {
     const request = new FormData();
     request.append('last_id', lastId);
     request.append('index', index);
@@ -22,7 +36,7 @@ class PostService {
     return response;
   }
 
-  async checkNewItem(lastId = -1, categoryId) {
+  async checkNewItem(lastId = 0, categoryId) {
     const request = new FormData();
     request.append('last_id', lastId);
     request.append('category_id', categoryId);

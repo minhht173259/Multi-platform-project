@@ -1,6 +1,7 @@
 /* eslint-disable default-param-last */
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { tokenStorage } from './TokenStorage';
 
 let cancel;
 
@@ -12,7 +13,7 @@ class ApiClient {
   initRequest(method = '', path = '', params = null) {
     const request = {
       baseUrl: this.baseUrl,
-      url: `${this.baseUrl}${path}`,
+      url: this.baseUrl + path,
       cancelToken: new axios.CancelToken(function executor(c) {
         cancel = c;
       }),
@@ -22,20 +23,44 @@ class ApiClient {
     return request;
   }
 
+  async checkTokenInvalid(response) {
+    if (response && response.code) {
+      await tokenStorage.tokenInvalid(response.code);
+      return null;
+    }
+    return response;
+  }
+
   async authorizeRequest(request) {
     // todo : Check Refresh token | duplicate service
-    const token = await SecureStore.getItemAsync('token');
+    const token = await AsyncStorage.getItem('token');
     if (!token) {
       return request;
     }
 
     if (!request.headers) {
       request.headers = {
-        Authentication: `Bearer ${token}`
+        Authorization: `Bearer ${token}`
       };
     } else {
-      request.headers.Authentication = `Bearer ${token}`;
+      request.headers.Authorization = `Bearer ${token}`;
     }
+    return request;
+  }
+
+  async authorizeFormRequest(request) {
+    // todo : Check Refresh token | duplicate service
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      return request;
+    }
+
+    request.headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data'
+    };
+
+    return request;
   }
 
   async get(path = '', params = null) {
@@ -57,6 +82,7 @@ class ApiClient {
     try {
       request = await this.authorizeRequest(request);
       const response = await axios(request);
+      // this.checkTokenInvalid(response.data);
       return response.data;
     } catch (error) {
       throw this.processError(error);
@@ -68,6 +94,18 @@ class ApiClient {
     request.data = body;
     try {
       request = await this.authorizeRequest(request);
+      const response = await axios(request);
+      return response.data;
+    } catch (error) {
+      throw this.processError(error);
+    }
+  }
+
+  async postFormData(path = '', body, params = null) {
+    let request = this.initRequest('post', path, params);
+    request.data = body;
+    try {
+      request = await this.authorizeFormRequest(request);
       const response = await axios(request);
       return response.data;
     } catch (error) {
@@ -112,7 +150,7 @@ class ApiClient {
        * is an instance of XMLHttpRequest in the browser and an instance
        * of http.ClientRequest in Node.js
        */
-      console.log(error.request);
+      console.log('Error', error.request);
       errorModel = {
         statusCode: null,
         errorCode: null,

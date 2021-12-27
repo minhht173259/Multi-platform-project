@@ -19,7 +19,7 @@ export const SETTING_ONE = [
     size: SIZE_ICON,
     label: 'Tài khoản và bảo mật',
     route: 'A',
-    key: ''
+    key: 'SECURITY'
   },
   {
     type: Icons.Fontisto,

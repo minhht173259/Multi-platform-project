@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Popup;
+export default React.memo(Popup);

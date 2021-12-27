@@ -8,11 +8,14 @@ import LoadingScreenStartApp from '../screen/LoadingScreen';
 import WelcomeScreen from '../screen/WelcomeScreen';
 import LoginScreen from '../screen/LoginScreen';
 import AuthenticationContext from '../context/auth-context/AuthenticationContext';
-import AuthLoadingScreen from '../screen/AuthLoadingScreen';
 import PostDetailScreen from '../screen/Main/post-screen/PostDetailScreen';
 import PostZoomInScreen from '../screen/Main/post-screen/PostZoomInScreen';
 import AddPostScreen from '../screen/Main/post-screen/AddPostScreen';
 import UserStackScreen from './UserStackScreens';
+import MessageStackScreen from './MessageStackScreen';
+import MessDetailScreen from '../screen/Main/mess/MessDetailScreen';
+import MessageOptionScreen from '../screen/Main/mess/MessageOptionScreen';
+import SearchScreen from '../screen/Main/search/SearchScreen';
 
 export const AppStack = createStackNavigator();
 
@@ -27,8 +30,6 @@ export default function AppStackScreens() {
     >
       {appContext.isLoadingStartApp ? (
         <AppStack.Screen name="Loading" component={LoadingScreenStartApp} />
-      ) : authState?.isLoading ? (
-        <AppStack.Screen name="AuthLoading" component={AuthLoadingScreen} />
       ) : authState?.token ? (
         <AppStack.Screen name="Main" component={MainStackScreens} options={{ headerShown: false }} />
       ) : (
@@ -37,13 +38,26 @@ export default function AppStackScreens() {
           <AppStack.Screen name="Login" component={LoginScreen} />
         </>
       )}
+      {authState?.token && authState.token !== '' && (
+        <>
+          <AppStack.Group screen screenOptions={{ presentation: 'transparentModal' }}>
+            <AppStack.Screen name="PostDetail" component={PostDetailScreen} />
+            <AppStack.Screen name="PostZoomIn" component={PostZoomInScreen} />
+            <AppStack.Screen name="PostCreate" component={AddPostScreen} />
+          </AppStack.Group>
 
-      <AppStack.Group screen>
-        <AppStack.Screen name="PostDetail" component={PostDetailScreen} />
-        <AppStack.Screen name="PostZoomIn" component={PostZoomInScreen} />
-        <AppStack.Screen name="PostCreate" component={AddPostScreen} />
-      </AppStack.Group>
-      <AppStack.Screen name="UserProfile" component={UserStackScreen} />
+          <AppStack.Group screen screenOptions={{ presentation: 'transparentModal', headerShown: true }}>
+            <AppStack.Screen name="MessageDetail" component={MessDetailScreen} />
+            <AppStack.Screen name="MessageOption" component={MessageOptionScreen} />
+          </AppStack.Group>
+          <AppStack.Group screen screenOptions={{ presentation: 'transparentModal', headerShown: true }}>
+            <AppStack.Screen name="Search" component={SearchScreen} />
+          </AppStack.Group>
+
+          {/* <AppStack.Screen name="MessageScreen" component={MessageStackScreen} /> */}
+          <AppStack.Screen name="UserProfile" component={UserStackScreen} />
+        </>
+      )}
     </AppStack.Navigator>
   );
 }

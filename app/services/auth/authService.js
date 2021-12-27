@@ -19,7 +19,7 @@ const authServices = {
     return response;
   },
 
-  async logout(phone = '', password = '') {
+  async logout() {
     const response = await apiClient.post('/logout', null, null);
     return response;
   }

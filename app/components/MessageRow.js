@@ -1,6 +1,9 @@
-import React from 'react';
-import { View, StyleSheet, Image, Text } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, Image, Text, TouchableHighlight } from 'react-native';
+import moment from 'moment';
 import { CONSTANTS } from '../constant/Constants';
+import { getTime } from '../common/getTime';
+import Colors from '../constant/Colors';
 
 const G_IMAGE_1 =
   'https://images.unsplash.com/photo-1514315384763-ba401779410f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=383&q=80';
@@ -11,7 +14,12 @@ const G_IMAGE_3 =
 const G_IMAGE_4 =
   'https://images.unsplash.com/photo-1604004555489-723a93d6ce74?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
 
-export const MessageRow = ({ isGroup = false, props }) => {
+const MessageRow = ({ item, isGroup = false, onPresRow, onLongPressRow, ...restProps }) => {
+  const timeMess = useMemo(() => {
+    if (item.lastmessage) {
+      return getTime(item.lastmessage.created);
+    }
+  }, [item.lastmessage]);
   const renderImageGroup = () => {
     const viewGroup = (
       <View style={styles.groupImages}>
@@ -76,62 +84,96 @@ export const MessageRow = ({ isGroup = false, props }) => {
   };
 
   return (
-    <View style={styles.messRowContainer}>
-      {!isGroup ? (
-        <Image
-          style={styles.userImage}
-          source={{
-            uri: G_IMAGE_4
-          }}
-        />
-      ) : (
-        renderImageGroup()
-      )}
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          flexGrow: 1,
-          width: CONSTANTS.WIDTH - 110,
-          padding: 20,
-          paddingLeft: 0,
-          borderBottomWidth: 1,
-          borderBottomColor: '#eeeeee'
-        }}
-      >
-        <View
-          style={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-        >
-          <Text style={[styles.textName]} numberOfLines={1} ellipsizeMode="tail">
-            {' '}
-            Đa nền tảng{' '}
-          </Text>
-          <Text style={[styles.textTime]}> 2 giờ </Text>
-        </View>
+    <TouchableHighlight
+      underlayColor={Colors.ZaloOverlayColor}
+      onPress={() => onPresRow(item)}
+      onLongPress={() => onLongPressRow(item)}
+    >
+      <View style={styles.messRowContainer}>
+        {!isGroup ? (
+          <Image
+            style={styles.userImage}
+            source={{
+              uri: item.partner.avatar || G_IMAGE_4
+            }}
+          />
+        ) : (
+          renderImageGroup()
+        )}
         <View
           style={{
             display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            width: '100%'
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            flexGrow: 1,
+            width: CONSTANTS.WIDTH - 110,
+            padding: 16,
+            paddingLeft: 0,
+            borderBottomWidth: 1,
+            borderBottomColor: '#eeeeee'
           }}
         >
-          <Text numberOfLines={1} ellipsizeMode="tail" style={[styles.textLastMess]}>
-            {' '}
-            Tin nhắn cuối Tin nhắn cuốiTin nhắn cuốiTin nhắn cuối
-          </Text>
-          {/* <Text> 2 giờ </Text> */}
+          <View
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <Text
+              style={[
+                styles.textName,
+                {
+                  fontWeight: item?.lastmessage?.unread ? 'bold' : '600'
+                }
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.partner.username}
+            </Text>
+            <Text style={[styles.textTime]}>{timeMess}</Text>
+          </View>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              width: '100%'
+            }}
+          >
+            {item.lastmessage && (
+              <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={[styles.textLastMess, { flexGrow: 1, fontWeight: item?.lastmessage?.unread ? 'bold' : '600' }]}
+                >
+                  {`${item.lastmessage.message || ''}`}
+                </Text>
+                {item.lastmessage.unread && (
+                  <View
+                    style={{
+                      width: 30,
+                      height: 18,
+                      borderRadius: 10,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: '#f26463'
+                    }}
+                  >
+                    <Text style={{ color: '#FFFFFF' }}>N</Text>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableHighlight>
   );
 };
 
@@ -144,13 +186,13 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   userImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginHorizontal: 20
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginHorizontal: 16
   },
   textName: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '600'
   },
   textTime: {
@@ -158,13 +200,13 @@ const styles = StyleSheet.create({
     color: '#858d92'
   },
   textLastMess: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#858d92'
   },
   groupImages: {
     height: 60,
     width: 60,
-    marginHorizontal: 20,
+    marginHorizontal: 16,
     position: 'relative'
   },
 
@@ -177,3 +219,5 @@ const styles = StyleSheet.create({
     borderRadius: 19
   }
 });
+
+export default React.memo(MessageRow);

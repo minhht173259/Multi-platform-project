@@ -5,7 +5,7 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import Popup from '../components/Popup';
 import { COLOR_ZALO } from '../constant/ColorCommon';
 
-export const LoadingContext = createContext({}, () => {});
+export const LoadingContext = createContext({});
 
 const LoadingEvent = {
   START: 'START_LOADING',

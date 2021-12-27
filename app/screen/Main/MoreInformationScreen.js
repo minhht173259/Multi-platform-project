@@ -26,7 +26,14 @@ export default function MoreInformationScreen({ navigation }) {
   }, [navigation]);
 
   const onClickNavigateProfile = useCallback(() => {
-    navigation.navigate('UserProfile', { screen: 'Profile' });
+    navigation.navigate('UserProfile', {
+      screen: 'Profile',
+      params: {
+        userId: authState.id,
+        username: authState.username,
+        avatar: authState.avatar
+      }
+    });
   }, [navigation]);
 
   return (
@@ -68,7 +75,7 @@ export default function MoreInformationScreen({ navigation }) {
           <Image
             style={styles.userImage}
             source={{
-              uri: 'https://reactnative.dev/img/tiny_logo.png'
+              uri: authState?.avatar ? authState.avatar : 'https://reactnative.dev/img/tiny_logo.png'
             }}
           />
           <TouchableWithoutFeedback onPress={onClickNavigateProfile}>

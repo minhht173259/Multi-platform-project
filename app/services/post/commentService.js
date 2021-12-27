@@ -45,7 +45,7 @@ class CommentAndLikeService {
     request.append('id', id);
     request.append('id_com', idCom);
 
-    const response = await apiClient.post('/delete_comment', request, null);
+    const response = await apiClient.post('/del_comment', request, null);
     return response;
   }
 }
