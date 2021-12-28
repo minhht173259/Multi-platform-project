@@ -13,6 +13,7 @@ import {
   Platform,
   Animated
 } from 'react-native';
+import { useNetInfo } from '@react-native-community/netinfo';
 import AuthenticationContext from '../../../context/auth-context/AuthenticationContext';
 import Icon, { Icons } from '../../../common/component/Icons';
 import Colors from '../../../constant/Colors';
@@ -31,7 +32,7 @@ const IMAGE_NAV_2 =
 
 export default function ProfileScreen({ navigation, route }) {
   const [authState, authContext] = useContext(AuthenticationContext);
-  const [_, userContext] = useContext(UserContext);
+  const [userState, userContext] = useContext(UserContext);
   const { username, avatar, userId, description, phonenumber } = route.params;
   const [user, setUser] = useState({});
 
@@ -39,7 +40,10 @@ export default function ProfileScreen({ navigation, route }) {
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const netInfo = useNetInfo();
+
   // const opacity = c;
+  console.log('TOKEN: ', authState.token);
 
   useEffect(() => {
     navigation.setOptions({
@@ -57,6 +61,9 @@ export default function ProfileScreen({ navigation, route }) {
             if (isMounted) {
               setUser(response.data);
             }
+            if (isOwner) {
+              authContext.refreshInformation(response.data.name, response.data.avatar.link);
+            }
           }
         }
       } catch (error) {
@@ -71,6 +78,8 @@ export default function ProfileScreen({ navigation, route }) {
       isMounted = false;
     };
   }, [userId, username]);
+
+  console.log('USER', user);
 
   const onPressAdvance = () => {
     if (isOwner) {
@@ -202,11 +211,14 @@ export default function ProfileScreen({ navigation, route }) {
               </Text>
             </View>
           </View>
+          <View />
         </ScrollView>
       </View>
     </>
   );
 }
+
+const PostView = ({ post, createdDate }) => {};
 
 const styles = StyleSheet.create({
   container: {

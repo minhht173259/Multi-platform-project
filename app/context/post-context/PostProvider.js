@@ -34,7 +34,9 @@ const PostProvider = ({ children }) => {
         let response = await postService.addPost(described, images, video);
         response = await processResponse(response);
         if (response.code === 1000) {
-          // dispatch({type: PostEvent.create, payload: })
+          const { id } = response.data;
+          const postResponse = await postService.getPost(id);
+          dispatch({ type: PostEvent.create, payload: postResponse.data });
         }
         return response;
       },
@@ -52,6 +54,15 @@ const PostProvider = ({ children }) => {
           processError(error);
           await AsyncStorage.setItem('list_post', JSON.stringify(newPosts));
           await AsyncStorage.setItem('last_id', JSON.stringify(lastIndex));
+        }
+        return response;
+      },
+
+      refreshPosts: async () => {
+        let response = await postService.checkNewItem(state.lastId, 0);
+        response = await processResponse(response);
+        if (response.code === 1000) {
+          dispatch({ type: PostEvent.checkNewItem, payload: response.data.posts });
         }
         return response;
       },
@@ -110,9 +121,17 @@ const PostProvider = ({ children }) => {
           dispatch({ type: PostEvent.delete, payload: postId });
         }
         return response;
+      },
+      editPost: async (postId, described) => {
+        let response = await postService.editPost(postId, described);
+        response = await processResponse(response);
+        if (response.code === 1000) {
+          dispatch({ type: PostEvent.edit, payload: { postId, described } });
+        }
+        return response;
       }
     }),
-    []
+    [state]
   );
 
   const context = useMemo(() => [state, postContext], [state]);

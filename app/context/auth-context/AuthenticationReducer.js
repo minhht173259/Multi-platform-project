@@ -32,10 +32,9 @@ export function authenticationReducer(state = authenticationStateDefault, action
     case AuthenticationEvent.signUp: {
       newState.token = action.payload.token;
       newState.id = action.payload.id;
-      newState.username = action.payload.user.name;
-      newState.active = action.payload.user.active;
-      newState.phoneNumber = action.payload.user.phonenumber;
-      newState.role = action.payload.user.role;
+      newState.username = action.payload.name;
+      newState.active = action.payload.active;
+      newState.phoneNumber = action.payload.phonenumber;
 
       newState.isLoggedIn = true;
       break;
@@ -69,6 +68,11 @@ export function authenticationReducer(state = authenticationStateDefault, action
       newState.active = action.payload.active;
       newState.isLoggedIn = true;
 
+      break;
+    }
+    case AuthenticationEvent.refreshInformationUser: {
+      newState.username = action.payload.username;
+      newState.avatar = action.payload.avatar;
       break;
     }
     default:

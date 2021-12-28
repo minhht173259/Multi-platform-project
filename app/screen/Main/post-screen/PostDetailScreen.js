@@ -11,11 +11,13 @@ import {
   Image,
   TouchableHighlight,
   ActivityIndicator,
-  Modal
+  Modal,
+  Dimensions
 } from 'react-native';
 import { useContext } from 'react/cjs/react.development';
 import _ from 'lodash';
 import { Video } from 'expo-av';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import Icon, { Icons } from '../../../common/component/Icons';
 import { COLOR_ZALO } from '../../../constant/ColorCommon';
 import AuthenticationContext from '../../../context/auth-context/AuthenticationContext';
@@ -32,6 +34,8 @@ const SPACING = 16;
 
 const DEFAULT_AVT =
   'https://images.unsplash.com/photo-1634749724963-721227794e53?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
+
+const { width } = Dimensions.get('window');
 
 const PostDetailScreen = ({ navigation, route }) => {
   const { post } = route.params;
@@ -68,6 +72,7 @@ const PostDetailScreen = ({ navigation, route }) => {
         try {
           const postResponse = await postContext.getPost(post.id);
           if (postResponse.code === 1000) {
+            console.log(postResponse.data);
             setPostCurrent(postResponse.data);
             setIsBlocked(postResponse.data.is_blocked);
           }
@@ -178,10 +183,14 @@ const PostDetailScreen = ({ navigation, route }) => {
     async text => {
       startLoading();
       try {
-        console.log('EDIT_COM: ', commentDelete.post_id, commentDelete.id, text);
         const response = await postCurrent.editComment(commentDelete.post_id, commentDelete.id, text);
         if (response === 1000) {
           //
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: `${response.code} - ${response.message}`
+          });
         }
       } catch (error) {
         //
@@ -193,8 +202,13 @@ const PostDetailScreen = ({ navigation, route }) => {
   );
 
   // render
-  const renderHeaderPostDetail = useMemo(
-    () => (
+  const renderHeaderPostDetail = useMemo(() => {
+    const sizeOfImage = postCurrent.images.length;
+    const numberOfCol = sizeOfImage !== 4 ? Math.floor(sizeOfImage / 2) + 1 : Math.floor(sizeOfImage / 2);
+    const padding = 16;
+    const WIDTH_ITEM = (width - padding * 2) / numberOfCol;
+    const HEIGHT_ITEM = (500 - padding * 2) / numberOfCol;
+    return (
       <>
         <View style={styles.contentHeader}>
           <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
@@ -234,14 +248,38 @@ const PostDetailScreen = ({ navigation, route }) => {
         </View>
 
         {postCurrent?.images && postCurrent.images.length > 0 && (
-          <View style={styles.contentImage}>
-            <Image
-              source={{
-                uri: postCurrent.images[0]?.link
-              }}
-              resizeMode="contain"
-              style={{ width: '100%', height: '100%' }}
-            />
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: sizeOfImage === 2 ? 'row' : 'column',
+              width: '100%',
+              height: 500,
+              flexWrap: 'wrap'
+            }}
+          >
+            {postCurrent.images.map((img, key) => (
+              <View
+                style={{
+                  width: WIDTH_ITEM,
+                  height: sizeOfImage > 2 ? HEIGHT_ITEM : 'auto',
+                  margin: 8,
+                  flexGrow: 1
+                }}
+                key={key}
+              >
+                <Image
+                  source={{
+                    uri: img.link
+                  }}
+                  style={{
+                    height: '100%',
+                    width: '100%',
+                    resizeMode: 'cover',
+                    borderRadius: 20
+                  }}
+                />
+              </View>
+            ))}
           </View>
         )}
 
@@ -326,9 +364,8 @@ const PostDetailScreen = ({ navigation, route }) => {
           </View>
         )}
       </>
-    ),
-    [loadingCm, postCurrent, isCurrentUser]
-  );
+    );
+  }, [loadingCm, postCurrent, isCurrentUser]);
 
   const renderItemRow = useCallback(
     ({ item }) => (

@@ -22,8 +22,8 @@ const SPACING = 16;
 
 const { width } = Dimensions.get('window');
 
-const AddPostScreen = ({ submit, closePopup }) => {
-  const [content, setContent] = useState();
+const EditPostScreen = ({ onEditPost, closePopup, contentOld }) => {
+  const [content, setContent] = useState(contentOld);
   const [images, setImages] = useState([]);
   const [video, setVideo] = useState();
 
@@ -33,7 +33,7 @@ const AddPostScreen = ({ submit, closePopup }) => {
 
   const onSubmitCreatePost = () => {
     if (isSubmit) {
-      submit(images, video, content);
+      onEditPost(content);
       closePopup();
     }
   };
@@ -187,7 +187,7 @@ const AddPostScreen = ({ submit, closePopup }) => {
         </TouchableOpacity>
         <View style={{ flexGrow: 1, marginLeft: 16 }}>{renderHeaderTitle()}</View>
         <TouchableOpacity style={{ marginRight: 10 }} onPress={onSubmitCreatePost}>
-          <Text style={{ color: isSubmit ? '#0c85fd' : '#87c8fc' }}>ĐĂNG</Text>
+          <Text style={{ color: isSubmit ? '#0c85fd' : '#87c8fc' }}>Sửa</Text>
         </TouchableOpacity>
       </View>
       <ScrollView horizontal={false} showsVerticalScrollIndicator={false}>
@@ -240,4 +240,4 @@ function HeaderTitle() {
 
 const styles = StyleSheet.create({});
 
-export default AddPostScreen;
+export default EditPostScreen;

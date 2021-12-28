@@ -1,5 +1,15 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, TouchableHighlight, Text, StatusBar, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableHighlight,
+  Text,
+  StatusBar,
+  Image,
+  RefreshControl
+} from 'react-native';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import SearchZalo from '../../components/SearchZalo';
 import Icon, { Icons } from '../../common/component/Icons';
@@ -20,13 +30,15 @@ export default function MessagesScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const { startLoading, endLoading } = useContext(LoadingContext);
 
+  const [refreshControl, setRefreshControl] = useState(false);
+
   useEffect(() => {
     const getConversations = async () => {
       setLoading(true);
       try {
         const response = await messageContext.getConversations(10);
-        userContext.getSuggestFriends(10);
-        userContext.getRequestFriends(10);
+        await userContext.getSuggestFriends(10);
+        await userContext.getRequestFriends(10);
 
         if (response.code !== 1000) {
           // do something error
@@ -89,12 +101,29 @@ export default function MessagesScreen({ navigation }) {
       const response = await userContext.setRequestFriend(userId);
       if (response.code === 1000) {
         //
-        console.log('RESPONSE: ', response);
       }
     } catch (error) {
       //
     }
     endLoading();
+  };
+
+  const handleRefresh = async () => {
+    setRefreshControl(true);
+    try {
+      const response = await messageContext.getConversations(10);
+      await userContext.getSuggestFriends(10);
+      await userContext.getRequestFriends(10);
+
+      if (response.code !== 1000) {
+        // do something error
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log('ERR MESS: ', error);
+      setLoading(false);
+    }
+    setRefreshControl(false);
   };
 
   return (
@@ -117,7 +146,18 @@ export default function MessagesScreen({ navigation }) {
       {loading ? (
         <LoadingFetch />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          horizontal={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshControl}
+              onRefresh={() => {
+                handleRefresh();
+              }}
+            />
+          }
+        >
           {/* todo */}
           <View style={{ backgroundColor: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {messageState.conversations.map((row, index) => (

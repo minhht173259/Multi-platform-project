@@ -9,14 +9,14 @@ export const defaultMessageState = {
 export const messageReducer = (state = defaultMessageState, action) => {
   switch (action.type) {
     case MessageEvent.getConversation: {
-      const newConversation = action.payload || [];
-      const lastId = _.last(newConversation).id || 0;
+      const newConversation = _.clone(action.payload);
+      const lastId = _.last(newConversation)?.id || 0;
       const newState = { ...state, conversations: [...newConversation], lastIdConversation: lastId };
       return newState;
     }
     case MessageEvent.getMoreConversation: {
-      const newConversation = action.payload || [];
-      const lastId = _.last(newConversation).id || state.lastIdConversation;
+      const newConversation = action.payload ? action.payload : [];
+      const lastId = _.last(newConversation)?.id || state.lastIdConversation;
       const newState = {
         ...state,
         conversations: [...state.conversations, ...newConversation],
@@ -34,10 +34,18 @@ export const messageReducer = (state = defaultMessageState, action) => {
     }
 
     case MessageEvent.deleteConversation: {
-      const newConversations = state.conversations.filter(conversation => conversation.id !== action.payload);
+      const newConversations = state.conversations.filter(conversation => conversation.partner.id !== action.payload);
       const newState = {
         ...state,
         conversations: newConversations
+      };
+      return newState;
+    }
+    case MessageEvent.getDetailConversation: {
+      // const newConversations = _.find(state.conversations,)
+      // console.log('Coversations: ', state.conversations);
+      const newState = {
+        ...state
       };
       return newState;
     }

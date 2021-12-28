@@ -37,6 +37,28 @@ const MessageProvider = ({ children }) => {
           dispatch({ type: MessageEvent.getConversation, payload: response.data });
         }
         return response;
+      },
+      getConversation: async (partnerId, index, count = 10) => {
+        let response = await chatService.getConversation(partnerId, index, count);
+        response = await processResponse(response);
+        if (response.code === 1000) {
+          dispatch({ type: MessageEvent.getDetailConversation, payload: response.data });
+        }
+        return response;
+      },
+      deleteConversation: async (partnerId, conversationId) => {
+        let response = await chatService.deleteConversation(partnerId, conversationId);
+        response = await processResponse(response);
+        if (response.code === 1000) {
+          dispatch({ type: MessageEvent.deleteConversation, payload: partnerId });
+        }
+        return response;
+      },
+      deleteMessage: async messageId => {
+        let response = await chatService.deleteMessage(messageId);
+        response = await processResponse(response);
+        console.log('RESPONSE: ', response);
+        return response;
       }
     }),
 

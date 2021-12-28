@@ -1,20 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  TextInput,
-  TouchableOpacity,
-  Keyboard,
-  TouchableHighlight
-} from 'react-native';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
+import { Text, View, StyleSheet, SafeAreaView, StatusBar, TextInput, Keyboard, TouchableHighlight } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import { AppContext } from '../context/AppContext';
+import Colors from '../constant/Colors';
+import { LoadingContext } from '../context/LoadingContext';
+import AuthenticationContext from '../context/auth-context/AuthenticationContext';
 
 const SignUpScreen = function ({ navigation }) {
-  const [auth, setAuth] = useContext(AppContext);
+  const [authState, authContext] = useContext(AuthenticationContext);
+  const { startLoading, endLoading } = useContext(LoadingContext);
 
   const [focus, setFocus] = useState({
     phone: false,
@@ -27,6 +20,8 @@ const SignUpScreen = function ({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState(null);
   const [password, setPassword] = useState(null);
   const [error, setError] = useState(null);
+
+  const isSubmit = useMemo(() => phoneNumber || password, [phoneNumber, password]);
 
   useEffect(() => {
     const KeyboardListenerShow = Keyboard.addListener('keyboardDidShow', () => {
@@ -42,35 +37,18 @@ const SignUpScreen = function ({ navigation }) {
     };
   }, []);
 
-  const handleLogin = () => {
-    fetch('https://zalo-group15.herokuapp.com/it4788/login', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        phonenumber: phoneNumber,
-        password
-      })
-    })
-      .then(res => res.json())
-      .then(resJson => {
-        if (resJson.code === 1000) {
-          setAuth(state => ({
-            ...state,
-            id: resJson.data?.id,
-            phoneNumber: resJson.data?.username,
-            avatar: resJson.data?.avatar,
-            token: resJson.data?.token,
-            role: resJson.data.role,
-            isLoggedIn: true
-          }));
-        } else {
-          setError(`${resJson.code} : ${resJson.message}`);
-        }
-      })
-      .catch(error => {});
+  const handleSignup = async () => {
+    startLoading();
+    try {
+      console.log('PRESS');
+      const response = await authContext.signup(phoneNumber, password);
+      if (response.code === 1000) {
+        // navigation.navigate('VerifyCode');
+      }
+    } catch (error) {
+      console.log('ERROR: ', error);
+    }
+    endLoading();
   };
 
   const handleChangePhoneNumber = text => {
@@ -108,10 +86,10 @@ const SignUpScreen = function ({ navigation }) {
           }}
         >
           {' '}
-          Đăng nhập{' '}
+          Đăng ký{' '}
         </Text>
       </View>
-      <Text style={styles.textSupport}> Vui lòng nhập số điện thoại và mật khẩu để đăng nhập</Text>
+      <Text style={styles.textSupport}> Vui lòng nhập số điện thoại và mật khẩu để đăng ký</Text>
       <View style={styles.form}>
         <TextInput
           placeholder="Số điện thoại"
@@ -174,18 +152,18 @@ const SignUpScreen = function ({ navigation }) {
             {`${isHiddenPassword ? 'HIỆN' : 'ẨN'}`}
           </Text>
         </View>
-        <TouchableOpacity style={{ marginTop: 20 }} activeOpacity={0.7}>
+        {authState?.error && (
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              color: '#3083DC'
+              fontSize: 14,
+              fontWeight: 'normal',
+              color: '#f15656',
+              marginTop: 10
             }}
           >
-            {' '}
-            Lấy lại mật khẩu{' '}
+            {authState.error}
           </Text>
-        </TouchableOpacity>
+        )}
       </View>
       <View style={styles.footer}>
         <Text style={{ opacity: isKeyboardVisible ? 0 : 1 }}>
@@ -197,8 +175,8 @@ const SignUpScreen = function ({ navigation }) {
           <TouchableHighlight
             activeOpacity={0.5}
             underlayColor="#98C5F3"
-            onPress={handleLogin}
-            style={styles.buttonNext}
+            onPress={handleSignup}
+            style={[styles.buttonNext, { backgroundColor: isSubmit ? Colors.zaloBlue : '#B2B2B2' }]}
           >
             <AntDesign name="arrowright" size={26} color="#fff" />
           </TouchableHighlight>

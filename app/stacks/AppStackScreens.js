@@ -12,10 +12,11 @@ import PostDetailScreen from '../screen/Main/post-screen/PostDetailScreen';
 import PostZoomInScreen from '../screen/Main/post-screen/PostZoomInScreen';
 import AddPostScreen from '../screen/Main/post-screen/AddPostScreen';
 import UserStackScreen from './UserStackScreens';
-import MessageStackScreen from './MessageStackScreen';
 import MessDetailScreen from '../screen/Main/mess/MessDetailScreen';
 import MessageOptionScreen from '../screen/Main/mess/MessageOptionScreen';
 import SearchScreen from '../screen/Main/search/SearchScreen';
+import SignUpScreen from '../screen/SignUpScreen';
+import VerifyCodeScreen from '../screen/VerifyCodeScreen';
 
 export const AppStack = createStackNavigator();
 
@@ -30,12 +31,13 @@ export default function AppStackScreens() {
     >
       {appContext.isLoadingStartApp ? (
         <AppStack.Screen name="Loading" component={LoadingScreenStartApp} />
-      ) : authState?.token ? (
+      ) : authState?.isLoggedIn ? (
         <AppStack.Screen name="Main" component={MainStackScreens} options={{ headerShown: false }} />
       ) : (
         <>
           <AppStack.Screen name="Welcome" component={WelcomeScreen} />
           <AppStack.Screen name="Login" component={LoginScreen} />
+          <AppStack.Screen name="Signup" component={SignUpScreen} />
         </>
       )}
       {authState?.token && authState.token !== '' && (
@@ -56,6 +58,7 @@ export default function AppStackScreens() {
 
           {/* <AppStack.Screen name="MessageScreen" component={MessageStackScreen} /> */}
           <AppStack.Screen name="UserProfile" component={UserStackScreen} />
+          <AppStack.Screen name="VerifyCode" component={VerifyCodeScreen} />
         </>
       )}
     </AppStack.Navigator>

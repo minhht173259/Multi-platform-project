@@ -14,13 +14,13 @@ export const userReducer = (state = defaultUserState, action) => {
   switch (action.type) {
     case UserEvent.getFriends: {
       const newFriends = action.payload || [];
-      const lastIdFriend = _.last(newFriends).id || state.lastIdFriend;
+      const lastIdFriend = _.last(newFriends)?.id || state.lastIdFriend;
       return { ...state, friends: [...newFriends], lastIdFriend };
     }
 
     case UserEvent.getSuggestFriends: {
       const newSuggestFriends = action.payload || [];
-      const lastIdSuggestFriend = _.last(newSuggestFriends).id || state.lastIdSuggestFriend;
+      const lastIdSuggestFriend = _.last(newSuggestFriends)?.id || state.lastIdSuggestFriend;
       return { ...state, suggestFriends: [...newSuggestFriends], lastIdSuggestFriend };
     }
     case UserEvent.getRequestFriend: {

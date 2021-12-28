@@ -25,6 +25,7 @@ const AuthenticationProvider = function ({ children }) {
       } catch (e) {
         console.log(e);
       }
+      await AsyncStorage.clear();
     };
     bootstrapAsync();
   }, []);
@@ -53,8 +54,6 @@ const AuthenticationProvider = function ({ children }) {
               active: response.data.active,
               token: response.token
             };
-            // await AsyncStorage.removeItem('token');
-            // await AsyncStorage.removeItem('user');
 
             await AsyncStorage.setItem('token', response.data.token);
             await AsyncStorage.setItem('user', JSON.stringify(userInfo));
@@ -67,22 +66,30 @@ const AuthenticationProvider = function ({ children }) {
           makeError('Server Error');
         }
       },
-      signUp: async (phone = '', password = '') => {
+      signup: async (phone = '', password = '') => {
         try {
           const response = await authServices.signUp(phone, password);
           if (response.code === 1000) {
-            dispatch({ type: AuthenticationEvent.signUp, payload: response.data });
+            const userInfo = {
+              id: response.data.user.id,
+              username: response.data.user.name,
+              avatar: response.data.user.avatar,
+              active: response.data.user.active,
+              token: response.data.token
+            };
 
-            await AsyncStorage.removeItem('token');
-            await AsyncStorage.removeItem('user');
+            dispatch({ type: AuthenticationEvent.signUp, payload: userInfo });
+            // await AsyncStorage.removeItem('token');
+            // await AsyncStorage.removeItem('user');
 
             await AsyncStorage.setItem('token', response.data.token);
-            await AsyncStorage.setItem('user', response.data.user.id);
+            await AsyncStorage.setItem('user', JSON.stringify(userInfo));
             clearError();
           } else {
             const errMess = `${response.code}: ${response.message}`;
             makeError(errMess);
           }
+          return response;
         } catch (error) {
           makeError('Server Error');
         }
@@ -93,7 +100,7 @@ const AuthenticationProvider = function ({ children }) {
           // todo: API bi invalid thi sao ??? -> sameAs loginOtherDevice:  code: 9998
           if (response.code === 1000 || response.code === 9998) {
             dispatch({ type: AuthenticationEvent.logout, payload: null });
-            AsyncStorage.clear();
+            await AsyncStorage.clear();
           } else {
             const errMess = `${response.code}: ${response.message}`;
             makeError(errMess);
@@ -109,6 +116,9 @@ const AuthenticationProvider = function ({ children }) {
         } catch (error) {
           console.log('ERROR LOGOUT: ', error);
         }
+      },
+      refreshInformation: (name, avatar) => {
+        dispatch({ type: AuthenticationEvent.refreshInformationUser, payload: { username: name, avatar } });
       }
     }),
     []

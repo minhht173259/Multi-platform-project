@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import {
   Text,
   View,
@@ -13,6 +13,7 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import AuthenticationContext from '../context/auth-context/AuthenticationContext';
 import { LoadingContext } from '../context/LoadingContext';
+import Colors from '../constant/Colors';
 
 const LoginScreen = function ({ navigation }) {
   const [authState, authContext] = useContext(AuthenticationContext);
@@ -27,6 +28,8 @@ const LoginScreen = function ({ navigation }) {
 
   const [phoneNumber, setPhoneNumber] = useState(null);
   const [password, setPassword] = useState(null);
+
+  const isSubmit = useMemo(() => phoneNumber || password, [phoneNumber, password]);
 
   useEffect(() => {
     const KeyboardListenerShow = Keyboard.addListener('keyboardDidShow', () => {
@@ -190,7 +193,7 @@ const LoginScreen = function ({ navigation }) {
             activeOpacity={0.5}
             underlayColor="#98C5F3"
             onPress={handleLogin}
-            style={styles.buttonNext}
+            style={[styles.buttonNext, { backgroundColor: isSubmit ? Colors.zaloBlue : '#B2B2B2' }]}
           >
             <AntDesign name="arrowright" size={26} color="#fff" />
           </TouchableHighlight>

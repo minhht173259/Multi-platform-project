@@ -59,11 +59,7 @@ const WelcomeScreen = function ({ navigation }) {
         <TouchableOpacity style={styles.login} activeOpacity={0.5} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.buttonText}> Đăng nhập </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.register}
-          activeOpacity={0.5}
-          onPress={() => navigation.navigate('RegisterPhone')}
-        >
+        <TouchableOpacity style={styles.register} activeOpacity={0.5} onPress={() => navigation.navigate('Signup')}>
           <Text style={[styles.buttonText, { color: '#000' }]}> Đăng ký </Text>
         </TouchableOpacity>
       </View>

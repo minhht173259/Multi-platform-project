@@ -15,6 +15,7 @@ export const PostReducer = (state = postStateDefault, action) => {
   switch (action.type) {
     case PostEvent.create: {
       newState.posts.unshift(action.payload);
+      newState.lastId = action.payload.id;
       break;
     }
     case PostEvent.loadPosts: {
@@ -24,6 +25,12 @@ export const PostReducer = (state = postStateDefault, action) => {
       break;
     }
     case PostEvent.checkNewItem: {
+      const postsNew = action.payload || [];
+      if (postsNew.length > 0) {
+        newState.lastId = postsNew[0].id;
+        const newPost = _.concat(postsNew, newState.posts);
+        newState.posts = newPost;
+      }
       break;
     }
     case PostEvent.saveLastId: {
@@ -39,8 +46,6 @@ export const PostReducer = (state = postStateDefault, action) => {
       const currentPostIndex = _.findIndex(newState.posts, post => post.id === action.payload.id);
       if (currentPostIndex) {
         newState.posts[currentPostIndex] = { ...action.payload };
-      } else {
-        newState.posts.unshift(action.payload);
       }
       break;
     }

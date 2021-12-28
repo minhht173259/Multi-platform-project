@@ -36,6 +36,8 @@ const EditInformationScreen = ({ navigation, route }) => {
   const [linkInput, setLinkInput] = useState(link);
   const [addressInput, setAddressInput] = useState();
 
+  const [error, setError] = useState();
+
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -46,8 +48,6 @@ const EditInformationScreen = ({ navigation, route }) => {
       base64: false,
       exif: false
     });
-
-    console.log('IMAGE PICKER: ', result);
 
     if (!result.cancelled) {
       setImage(result);
@@ -76,6 +76,9 @@ const EditInformationScreen = ({ navigation, route }) => {
           description: descriptionInput,
           phonenumber
         });
+      } else {
+        const errMess = `${response.code} - ${response.message}`;
+        setError(errMess);
       }
     } catch (error) {
       //
@@ -95,6 +98,11 @@ const EditInformationScreen = ({ navigation, route }) => {
             style={styles.imagePicker}
           />
         </TouchableOpacity>
+        {error && error !== '' && (
+          <View>
+            <Text style={{ fontSize: 14, color: Colors.zaloRed }}>{error}</Text>
+          </View>
+        )}
         <View style={styles.formInputContainer}>
           <InputCustom
             title="Nhập họ và tên"

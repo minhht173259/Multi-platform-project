@@ -7,5 +7,6 @@ export const AuthenticationEvent = {
   restoreToken: 'RESTORE_TOKEN',
   restoreUserInfo: 'RESTORE_USER_INFO',
   setLoading: 'LOADING_CALL_API',
-  error: 'SET_ERROR'
+  error: 'SET_ERROR',
+  refreshInformationUser: 'REFRESH_INFORMATION'
 };

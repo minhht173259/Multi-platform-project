@@ -1,48 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Text, View, Animated, StyleSheet, Image, StatusBar, TouchableHighlight, Dimensions } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import Icon, { Icons } from '../../../common/component/Icons';
 import { COLOR_ZALO } from '../../../constant/ColorCommon';
 import Colors from '../../../constant/Colors';
 import Popup from '../../../components/Popup';
-
-const forSlide = ({ current, next, inverted, layouts: { screen } }) => {
-  const progress = Animated.add(
-    current.progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 1],
-      extrapolate: 'clamp'
-    }),
-    next
-      ? next.progress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, 1],
-          extrapolate: 'clamp'
-        })
-      : 0
-  );
-
-  return {
-    cardStyle: {
-      transform: [
-        {
-          translateX: Animated.multiply(
-            progress.interpolate({
-              inputRange: [0, 1, 2],
-              outputRange: [
-                screen.width, // Focused, but offscreen in the beginning
-                0, // Fully focused
-                screen.width * -0.3 // Fully unfocused
-              ],
-              extrapolate: 'clamp'
-            }),
-            inverted
-          )
-        }
-      ]
-    }
-  };
-};
+import MessageContext from '../../../context/message-context/MessageContext';
+import { LoadingContext } from '../../../context/LoadingContext';
 
 const DEFAULT_AVT =
   'https://images.unsplash.com/photo-1612422659019-0d1456e66bca?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=465&q=80';
@@ -72,7 +37,9 @@ const OPTIONS = [
 
 const MessageOptionScreen = ({ navigation, route }) => {
   const [open, setOpen] = useState(false);
-  const { partnerId, partnerAvatar, partnerName, partnerPhone } = route.params;
+  const { partnerId, partnerAvatar, partnerName, partnerPhone, conversationId } = route.params;
+  const [messageState, messageContext] = useContext(MessageContext);
+  const { startLoading, endLoading } = useContext(LoadingContext);
   useEffect(() => {
     navigation.setOptions({
       headerShown: true,
@@ -100,6 +67,31 @@ const MessageOptionScreen = ({ navigation, route }) => {
   const closePopup = useCallback(() => {
     setOpen(false);
   }, []);
+
+  const onDeleteConversation = async () => {
+    try {
+      startLoading();
+      const response = await messageContext.deleteConversation(partnerId, conversationId);
+      if (response.code === 1000) {
+        Toast.show({
+          type: 'success',
+          text1: 'Xóa cuộc trò chuyện thành công'
+        });
+        navigation.navigate('Main', {
+          screen: 'Message'
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `${response.code} - ${response.message}`
+        });
+      }
+    } catch (error) {
+      //
+    }
+    setOpen(false);
+    endLoading();
+  };
 
   return (
     <View style={[styles.container]}>
@@ -212,6 +204,7 @@ const MessageOptionScreen = ({ navigation, route }) => {
             <TouchableHighlight
               style={{ width: 40, height: 30, alignItems: 'center', justifyContent: 'center' }}
               underlayColor={Colors.ZaloOverlayColor}
+              onPress={onDeleteConversation}
             >
               <Text
                 style={{

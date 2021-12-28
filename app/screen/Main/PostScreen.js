@@ -12,14 +12,17 @@ import {
   TouchableWithoutFeedback,
   StatusBar,
   FlatList,
-  Dimensions,
   TextInput,
   Modal,
-  ActivityIndicator
+  ActivityIndicator,
+  RefreshControl,
+  Dimensions,
+  Linking
 } from 'react-native';
 import { AntDesign, Entypo } from '@expo/vector-icons';
 import { Video } from 'expo-av';
 import Toast from 'react-native-toast-message';
+import ParsedText from 'react-native-parsed-text';
 import TextStyles from '../../components/Text';
 import SearchZalo from '../../components/SearchZalo';
 import Icon, { Icons } from '../../common/component/Icons';
@@ -35,6 +38,7 @@ import AddPostScreen from './post-screen/AddPostScreen';
 import { LoadingContext } from '../../context/LoadingContext';
 
 const postOptions = [{ label: 'Đăng hình' }, { label: 'Đăng video' }, { label: 'Hình nền' }];
+const { width } = Dimensions.get('window');
 
 const DEFAULT_AVATAR =
   'https://images.unsplash.com/photo-1637722873821-3196d8c0f74f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=387&q=80';
@@ -44,18 +48,6 @@ export default function PostScreen({ navigation }) {
   const { startLoading, endLoading } = useContext(LoadingContext);
   const [postState, postContext] = useContext(PostContext);
   const [loading, setLoading] = useState(false);
-  const [posts, setPosts] = useState(postState.posts);
-
-  // const { posts } = postState;
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      // Screen was focused
-      // Do something
-      setPosts(postState.posts);
-    });
-
-    return unsubscribe;
-  }, [navigation]);
 
   const [openAdvance, setOpenAdvance] = useState(false);
   const [openReport, setOpenReport] = useState(false);
@@ -67,17 +59,19 @@ export default function PostScreen({ navigation }) {
   const [openEdit, setOpenEdit] = useState(false);
 
   const [hasScroll, setHasScroll] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshControl, setRefreshControl] = useState(false);
+
+  const [error, setError] = useState();
 
   useEffect(() => {
-    let isMounted = true;
     async function getPosts() {
       setLoading(true);
       try {
         const postsResponse = await postContext.getListPosts(10);
-        if (postsResponse.code === 1000) {
-          if (isMounted) {
-            setPosts(postState.posts);
-          }
+        if (postsResponse.code !== 1000) {
+          const errMess = `${postsResponse.code} - ${postsResponse.message}`;
+          setError(errMess);
         }
         setLoading(false);
       } catch (error) {
@@ -86,49 +80,70 @@ export default function PostScreen({ navigation }) {
       }
     }
     getPosts();
-    return () => {
-      isMounted = false;
-    };
+    return () => {};
   }, []);
 
   const handleLoadMore = async () => {
     if (hasScroll) {
+      console.log('LOADING MORE');
       try {
-        const postsResponse = await postContext.getListPosts(10);
-        if (postsResponse.code === 1000) {
-          //
-          setPosts(postState.posts);
-        }
+        setLoadingMore(true);
+        // TODO
+        // const postsResponse = await postContext.getListPosts(5);
+        // if (postsResponse.code === 1000) {
+        //   //
+        //   console.log('LOADING MORE');
+        // }
       } catch (error) {
         console.log('Error: ', error);
       }
     }
+    setLoadingMore(false);
   };
 
-  const onClickWatchDetail = post => {
+  const handleRefresh = async () => {
+    try {
+      setRefreshControl(true);
+      const postsResponse = await postContext.refreshPosts();
+      if (postsResponse.code !== 1000) {
+        const errMess = `${postsResponse.code} - ${postsResponse.message}`;
+        setError(errMess);
+      }
+      console.log('REFRESH');
+    } catch (error) {
+      console.log('Error: ', error);
+    }
+    setRefreshControl(false);
+  };
+
+  const onClickWatchDetail = useCallback(post => {
     navigation.navigate('PostDetail', {
       post
     });
-  };
+  }, []);
 
-  const onClickZoomInImage = post => {
+  const onClickZoomInImage = useCallback(post => {
     navigation.navigate('PostZoomIn', {
       post
     });
-  };
+  }, []);
 
-  const onPressLike = async id => {
+  const onPressLike = useCallback(async id => {
     try {
       await postContext.likePost(id);
     } catch (error) {
       //
     }
+  }, []);
+
+  const handleUrlPress = url => {
+    Linking.openURL(url);
   };
 
-  const onPressOpenAdvance = report => {
+  const onPressOpenAdvance = useCallback(report => {
     setReportPost(report);
     setOpenAdvance(true);
-  };
+  }, []);
 
   const onPressOpenReport = () => {
     setOpenReport(true);
@@ -145,6 +160,7 @@ export default function PostScreen({ navigation }) {
     }
     if (key === OPTIONS_KEY.EDIT) {
       // edit
+      setOpenEdit(true);
     }
     if (key === OPTIONS_KEY.REPORT) {
       // report
@@ -198,6 +214,11 @@ export default function PostScreen({ navigation }) {
           text1: 'Báo cáo hoạt động thành công'
         });
         console.log('SUCCESS REPORT ', reportPost.id, key, reason);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `${response.code} - ${response.message}`
+        });
       }
     } catch (error) {
       console.log('ERROR REPORT: ', error);
@@ -220,7 +241,11 @@ export default function PostScreen({ navigation }) {
           type: 'success',
           text1: 'Xóa hoạt động thành công'
         });
-        console.log('DELETE POST SUCCESS');
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `'Xóa hoạt động không thành công' + ${response.code} - ${response.message} `
+        });
       }
     } catch (error) {
       console.log('ERROR DELETE POST: ', error);
@@ -233,8 +258,6 @@ export default function PostScreen({ navigation }) {
   }, [reportPost]);
 
   const handleSubmitCreatePost = async (images, video, described) => {
-    // handle 1 image or 1 video
-    // console.log('CRATE: ', images, video, described);
     try {
       startLoading();
       const response = await postContext.addPost(described, images, video);
@@ -243,13 +266,41 @@ export default function PostScreen({ navigation }) {
           type: 'success',
           text1: 'Tạo mới hoạt động thành công'
         });
-        const postResponse = await postContext.getPost(response.data.id);
-        if (postResponse.code === 100) {
-          // OK
-          // TODO: wrong
-          const newPosts = [postResponse.data, ...posts];
-          setPosts(newPosts);
-        }
+        // const postResponse = await postContext.getPost(response.data.id);
+        // if (postResponse.code !== 100) {
+        //   //
+        // }
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `${response.code} - ${response.message}`
+        });
+      }
+    } catch (error) {
+      //
+      console.log('ERROR, ', error);
+    }
+    endLoading();
+  };
+
+  const handleSubmitEditPost = async described => {
+    try {
+      startLoading();
+      const response = await postContext.editPost(reportPost.id, described);
+      if (response.code === 1000) {
+        Toast.show({
+          type: 'success',
+          text1: 'Chỉnh sửa hoạt động thành công'
+        });
+        // const postResponse = await postContext.getPost(response.data.id);
+        // if (postResponse.code !== 100) {
+        //   //
+        // }
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: `${response.code} - ${response.message}`
+        });
       }
     } catch (error) {
       //
@@ -261,6 +312,11 @@ export default function PostScreen({ navigation }) {
   const onSubmitCreatePost = useCallback((images, video, described) => {
     handleSubmitCreatePost(images, video, described);
   }, []);
+
+  const onSubmitEditPost = useCallback((postId, content) => {
+    handleSubmitEditPost(content);
+  });
+
   const renderHeaderFlatView = useCallback(
     () => (
       <View style={styles.upload_post_container}>
@@ -326,7 +382,7 @@ export default function PostScreen({ navigation }) {
     []
   );
 
-  const renderVideo = item => {
+  const renderVideo = useCallback(item => {
     if (!item || !item?.video || !item.video?.link) {
       return;
     }
@@ -341,12 +397,19 @@ export default function PostScreen({ navigation }) {
         style={{ width: '100%', height: 500 }}
       />
     );
-  };
+  }, []);
 
   const renderItem = ({ item, index }) => {
     if (item.is_blocked) {
       return <View />;
     }
+
+    const sizeOfImage = item.images.length;
+    const numberOfCol = sizeOfImage !== 4 ? Math.floor(sizeOfImage / 2) + 1 : Math.floor(sizeOfImage / 2);
+    const padding = 16;
+    const WIDTH_ITEM = (width - padding * 2) / numberOfCol;
+    const HEIGHT_ITEM = (500 - padding * 2) / numberOfCol;
+
     return (
       <TouchableWithoutFeedback onPress={() => onClickWatchDetail(item)}>
         <View style={styles.post_element_container} key={index}>
@@ -400,19 +463,48 @@ export default function PostScreen({ navigation }) {
             </View>
           </TouchableWithoutFeedback>
 
-          <Text style={{ fontSize: 16, padding: 16 }}>{item.content}</Text>
+          <ParsedText
+            style={{ fontSize: 16, padding: 16 }}
+            parse={[{ type: 'url', style: styles.url, onPress: handleUrlPress }]}
+            childrenProps={{ allowFontScaling: false }}
+          >
+            {item.content}
+          </ParsedText>
           {item?.images && item.images.length > 0 && (
             <TouchableWithoutFeedback onPress={() => onClickZoomInImage(item)}>
-              <Image
-                source={{
-                  uri: item.images[0].link
-                }}
+              <View
                 style={{
-                  height: 500,
+                  display: 'flex',
+                  flexDirection: sizeOfImage === 2 ? 'row' : 'column',
                   width: '100%',
-                  resizeMode: 'contain'
+                  height: 500,
+                  flexWrap: 'wrap'
                 }}
-              />
+              >
+                {item.images.map((img, key) => (
+                  <View
+                    style={{
+                      width: WIDTH_ITEM,
+                      height: sizeOfImage > 2 ? HEIGHT_ITEM : 'auto',
+                      margin: 8,
+                      flexGrow: 1
+                    }}
+                    key={key}
+                  >
+                    <Image
+                      source={{
+                        uri: img.link
+                      }}
+                      style={{
+                        height: '100%',
+                        width: '100%',
+                        resizeMode: 'cover',
+                        borderRadius: 20
+                      }}
+                    />
+                  </View>
+                ))}
+              </View>
             </TouchableWithoutFeedback>
           )}
 
@@ -476,15 +568,25 @@ export default function PostScreen({ navigation }) {
         renderItem={renderItem}
         keyExtractor={(item, index) => `-${item.id}-${index}`}
         ListHeaderComponent={renderHeaderFlatView}
-        initialNumToRender={7}
-        ListFooterComponent={() => (
-          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={COLOR_ZALO.searchBackground} />
-          </View>
-        )}
+        initialNumToRender={5}
+        ListFooterComponent={() =>
+          loadingMore && (
+            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size="small" color={COLOR_ZALO.searchBackground} />
+            </View>
+          )
+        }
         onScroll={() => setHasScroll(true)}
         onEndReached={handleLoadMore}
-        onEndThreshold={0}
+        onEndReachedThreshold={0.1}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshControl}
+            onRefresh={() => {
+              handleRefresh();
+            }}
+          />
+        }
       />
       <BottomPopup open={openAdvance} closePopup={() => setOpenAdvance(false)}>
         <AdvanceView reportPost={reportPost} userId={authState.id} onPressRow={onPressAdvanceRow} />
@@ -500,6 +602,9 @@ export default function PostScreen({ navigation }) {
       </Popup>
       <Modal visible={openCreate} presentationStyle="overFullScreen">
         <AddPostScreen submit={onSubmitCreatePost} closePopup={() => setOpenCreate(false)} />
+      </Modal>
+      <Modal visible={openEdit} presentationStyle="overFullScreen">
+        <AddPostScreen submit={onSubmitEditPost} closePopup={() => setOpenEdit(false)} />
       </Modal>
     </View>
   );
@@ -728,5 +833,9 @@ const styles = StyleSheet.create({
   post_element_container: {
     marginTop: 15,
     backgroundColor: '#ffffff'
+  },
+  url: {
+    color: Colors.zaloBlue,
+    textDecorationLine: 'underline'
   }
 });

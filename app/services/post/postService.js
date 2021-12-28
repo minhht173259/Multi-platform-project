@@ -1,20 +1,21 @@
 import apiClient from '../ApiClient';
 
 class PostService {
-  async addPost(described, images, video) {
+  async addPost(described, images = [], video) {
     const formDataRequest = new FormData();
     formDataRequest.append('described', described);
     if (images && images.length > 0) {
       // TODO: map
-      formDataRequest.append('image[]', {
-        uri: images[0].uri,
-        name: 'abc',
-        type: 'image/**'
+      images.forEach((image, index) => {
+        formDataRequest.append('image[]', {
+          uri: image.uri,
+          name: `abc${index}`,
+          type: 'image/**'
+        });
       });
     } else if (video) {
       formDataRequest.append('video', video);
     }
-
     const response = await apiClient.post('/add_post', formDataRequest, null);
     return response;
   }

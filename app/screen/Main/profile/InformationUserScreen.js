@@ -79,6 +79,15 @@ const InformationUserScreen = ({ navigation, route }) => {
     });
   };
 
+  const onPressMess = () => {
+    navigation.push('MessageDetail', {
+      partnerId: userId,
+      partnerAvatar: avatar?.link,
+      partnerName: username,
+      partnerPhone: phonenumber
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -105,7 +114,7 @@ const InformationUserScreen = ({ navigation, route }) => {
               <Text style={styles.buttonText}>Đổi thông tin</Text>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity style={styles.buttonOwner}>
+            <TouchableOpacity style={styles.buttonOwner} onPress={onPressMess}>
               <Text style={styles.buttonText}>Nhắn tin</Text>
             </TouchableOpacity>
           )}
